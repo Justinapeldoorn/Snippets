@@ -1,0 +1,49 @@
+select * from spoortakbelegging stb
+inner join sein sn on stb.id = sn.spoortakbelegging_id
+where sn.type1 = 'BED_SEIN' and sn.naam = '334';
+
+select * from spoortak stk
+inner join spoortakbelegging stb on stb.spoortak_id = stk.id
+left outer join sein sn on stb.id = sn.spoortakbelegging_id
+inner join kaartpositie kpos on kpos.spoortakbelegging_id = stb.id
+where stb.spoortak_id = 5170252048
+order by stb.volgnr;
+
+//////////// Trein naar boven halen in de database \\\\\\\\\\\\\\\\
+select TO_JNSTRING(der.SDGELDIGHEID), der.*, vvvsl.*, vvv.* from dipelementref der
+inner join dagbewegingvvvsleutel vvvsl on der.LOGISCHESLEUTEL_ID = vvvsl.id
+inner join dagbewegingvvv vvv on der.TECHNISCHESLEUTEL_ID = vvv.id
+inner join planversie pv on der.DRGLINFRAPLAN_ID = pv.DRGLINFRAPLAN_ID
+where vvvsl.code = '43526' 
+  and pv.LOGISCHEPLANVERSIE_ID = (select pvs.LOGISCHEPLANVERSIE_ID from planversie pvs where pvs.naam = '20180429-SD-20180513');
+
+ 
+ 
+/////////////////// Geef een BU beweging met activiteiten \\\\\\\\\\\\\\\\\
+select act.drglptnaam, act.activiteitsoort_code, TO_CHAR(act.plantijd, 'HH24:MI:ss'), TO_CHAR(act.berekendeplantijd, 'HH24:MI:ss')  from bewegingsactiviteit act
+inner join BEWEGING bew on act.beweging_id = bew.id
+inner join dipelementref der on der.TECHNISCHESLEUTEL_ID=bew.id
+inner join BEWEGINGSLEUTEL s on s.id = der.LOGISCHESLEUTEL_ID
+inner join planversie pv on pv.DRGLINFRAPLAN_ID=der.DRGLINFRAPLAN_ID
+where pv.logischeplanversie_id = 5679800017 and s.code='C31100'
+order by act.volgnr;
+
+///////////////////////Geef een BD/SD beweging met activiteiten\\\\\\\\\\\\\\\\\\\\\\\
+select act.* from bewegingsactiviteit act
+inner join BEWEGINGSAFWIJKING afw on act.BEWEGINGSAFWIJKING_ID=afw.id 
+inner join DAGBEWEGINGVVV v on v.ID=afw.DAGBEWEGINGVVV_ID
+inner join dipelementref der on der.TECHNISCHESLEUTEL_ID=v.id
+inner join DAGBEWEGINGVVVSLEUTEL s on s.id = der.LOGISCHESLEUTEL_ID
+inner join planversie pv on pv.DRGLINFRAPLAN_ID=der.DRGLINFRAPLAN_ID
+where pv.logischeplanversie_id = 5679800017
+order by act.volgnr;
+
+///////////////////////Geef een BD/SD beweging o.b.v. een trein nummer\\\\\\\\\\\\\\\\\\\\\\\
+select TO_CHAR(act.plantijd, 'HH24:MI:ss'), TO_CHAR(act.berekendeplantijd, 'HH24:MI:ss') act.spelingsduur, s.code from bewegingsactiviteit act
+inner join BEWEGINGSAFWIJKING afw on act.BEWEGINGSAFWIJKING_ID=afw.id 
+inner join DAGBEWEGINGVVV v on v.ID=afw.DAGBEWEGINGVVV_ID
+inner join dipelementref der on der.TECHNISCHESLEUTEL_ID=v.id
+inner join DAGBEWEGINGVVVSLEUTEL s on s.id = der.LOGISCHESLEUTEL_ID
+inner join planversie pv on pv.DRGLINFRAPLAN_ID=der.DRGLINFRAPLAN_ID
+where pv.logischeplanversie_id = 4311359202 and s.code = '1504'
+order by act.volgnr;
